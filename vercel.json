@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://https://tbs-minierp-back.onrender.com/api/$1"
+      "destination": "https://tbs-minierp-back.onrender.com/api/$1"
     },
     {
       "source": "/(.*)",
