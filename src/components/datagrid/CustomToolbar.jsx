@@ -22,7 +22,7 @@ export default function CustomToolbar({
   columnFilters,
   onClearOneFilter,
   onResetAll,
-
+  titleText,
   // 폐기
   onDispose,
   tgDisposeMode,
@@ -71,6 +71,14 @@ export default function CustomToolbar({
           <Button
             size="small"
             color="primary"
+            sx={
+              titleText && {
+                backgroundColor: "#dee2e6",
+                color: "#adb5bd",
+                borderColor: "#e9ecef",
+              }
+            }
+            disabled={titleText}
             variant="outlined"
             onClick={handleRegistForm}
           >

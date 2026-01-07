@@ -245,6 +245,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
           }}
           slotProps={{
             toolbar: {
+              titleText: title,
               globalSearch,
               onGlobalSearchChange: setGlobalSearch,
               onExport: handleExport,
