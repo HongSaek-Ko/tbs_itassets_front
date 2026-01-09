@@ -61,6 +61,7 @@ export default function RegistAssetDialog({ open, onClose }) {
         onClose={closeAll}
         onPickDirect={onPickDirect}
         onExcelPrefill={onExcelPrefill}
+        getCurrentRows={() => getValues("rows")}
       />
 
       <Dialog

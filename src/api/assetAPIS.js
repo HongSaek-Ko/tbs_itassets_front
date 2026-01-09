@@ -30,6 +30,11 @@ export const fetchNextAssetId = (assetType) => {
   return axiosInstance.get("/assets/nextId", { params: { assetType } });
 };
 
+// 시리얼 번호 조회
+export const fetchAssetSnList = () => {
+  return axiosInstance.get("/assets/sn");
+};
+
 // 자산 등록
 export const createAsset = (payload) => {
   console.log(payload);

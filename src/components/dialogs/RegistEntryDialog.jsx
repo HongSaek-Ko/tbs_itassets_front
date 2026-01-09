@@ -17,17 +17,22 @@ import {
   excelRowToRegistInitial,
   readExcelToObjects,
 } from "../hooks/assetExcel";
+import { fetchAssetSnList } from "../../api/assetAPIS";
 
 export default function RegistEntryDialog({
   open,
   onClose,
   onPickDirect, // () => void
   onExcelPrefill, // (initialValues) => void
+  getCurrentRows, //
 }) {
   const fileRef = useRef(null);
 
   const [empList, setEmpList] = useState([]);
   const [empLoading, setEmpLoading] = useState(false);
+
+  const [snSet, setSnSet] = useState(() => new Set()); // ✅ DB에 이미 존재하는 SN Set
+  const [snLoading, setSnLoading] = useState(false);
 
   const [bottomMsg, setBottomMsg] = useState("");
 
@@ -37,17 +42,47 @@ export default function RegistEntryDialog({
 
     const load = async () => {
       setEmpLoading(true);
+      setSnLoading(true);
       try {
-        const res = await fetchEmpList();
-        const body = res.data?.data ?? res.data;
-        setEmpList(Array.isArray(body) ? body : []);
-      } catch (e) {
-        console.error(e);
-        setEmpList([]);
+        // ✅ 병렬 로드
+        const [empRes, snRes] = await Promise.allSettled([
+          fetchEmpList(),
+          fetchAssetSnList(),
+        ]);
+
+        // 직원
+        if (empRes.status === "fulfilled") {
+          const body = empRes.value.data?.data ?? empRes.value.data;
+          setEmpList(Array.isArray(body) ? body : []);
+        } else {
+          console.error(empRes.reason);
+          setEmpList([]);
+        }
+
+        // 시리얼 목록
+        if (snRes.status === "fulfilled") {
+          const body = snRes.value.data?.data ?? snRes.value.data; // 자네 응답 구조대로
+          const arr = Array.isArray(body) ? body : [];
+          const next = new Set(
+            arr
+              .map((v) =>
+                String(v ?? "")
+                  .trim()
+                  .toUpperCase()
+              )
+              .filter(Boolean)
+          );
+          setSnSet(next);
+        } else {
+          console.error(snRes.reason);
+          setSnSet(new Set());
+        }
       } finally {
         setEmpLoading(false);
+        setSnLoading(false);
       }
     };
+
     load();
   }, [open]);
 
@@ -56,6 +91,23 @@ export default function RegistEntryDialog({
     empList.forEach((e) => s.add(String(e.empId)));
     return s;
   }, [empList]);
+
+  // 시리얼 번호 정규화
+  const normalizeSerial = (v) =>
+    String(v ?? "")
+      .trim()
+      .toUpperCase();
+
+  const pickSnFromExcelRow = (row) => {
+    const v =
+      row?.["S/N"] ??
+      row?.["시리얼번호"] ??
+      row?.["SN"] ??
+      row?.["Serial"] ??
+      row?.["serial"] ??
+      "";
+    return normalizeSerial(v);
+  };
 
   const handleClickUpload = () => {
     setBottomMsg("");
@@ -79,15 +131,43 @@ export default function RegistEntryDialog({
         return;
       }
 
-      // // 첫 데이터 행만 폼에 자동 기입
-      // const firstRow = objects[0];
-      // const initialValues = excelRowToRegistInitial(firstRow, empIdSet);
-      // 다중 등록(기입)
-      const initialRows = objects.map((row) =>
-        excelRowToRegistInitial(row, empIdSet)
+      // 폼 내 이미 입력된 SN Set
+      const currentRows =
+        typeof getCurrentRows === "function" ? getCurrentRows() : [];
+      const usedSnInFormSet = new Set(
+        (Array.isArray(currentRows) ? currentRows : [])
+          .map((r) => normalizeSerial(r?.assetSn))
+          .filter(Boolean)
       );
 
-      // 사번이 DB에 없거나, 날짜 파싱 실패 등은 기입되지 않음
+      // 엑셀 내부 중복 체크용 Set
+      const usedSnInExcelSet = new Set();
+
+      // 변환
+      const initialRows = objects.map((row) => {
+        const converted = excelRowToRegistInitial(row, empIdSet);
+
+        // SN 중복 체크
+        const snNorm = normalizeSerial(converted?.assetSn);
+        if (!snNorm) return converted;
+
+        const isDup =
+          snSet.has(snNorm) || // DB 중복
+          usedSnInFormSet.has(snNorm) || // 폼 내 중복
+          usedSnInExcelSet.has(snNorm); // 엑셀 내부 중복
+
+        if (isDup) {
+          return {
+            ...converted,
+            assetSn: "", // 중복 시리얼 번호 비우기
+            _errors: { ...(converted._errors || {}), assetSn: "S/N 중복" },
+          };
+        }
+
+        usedSnInExcelSet.add(snNorm);
+        return converted;
+      });
+
       onExcelPrefill?.(initialRows);
     } catch (err) {
       console.error(err);
@@ -148,7 +228,7 @@ export default function RegistEntryDialog({
             size="large"
             variant="outlined"
             onClick={handleClickUpload}
-            disabled={empLoading}
+            disabled={empLoading || snLoading}
           >
             엑셀로 업로드 하기
           </Button>

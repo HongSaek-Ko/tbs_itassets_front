@@ -11,7 +11,7 @@ import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 
-import { createAsset } from "../../api/assetAPIS";
+import { fetchAssetSnList, createAsset } from "../../api/assetAPIS";
 
 import RegistFormToolbar from "../regist/RegistFormToolbar";
 import RegistFormGrid from "../regist/RegistFormGrid";
@@ -48,6 +48,42 @@ export default function RegistFormDialog({ onClose, initialRows }) {
   const [bottomMsg, setBottomMsg] = useState("");
   const [assetIdLoadingRows, setAssetIdLoadingRows] = useState({}); // uiId -> bool
 
+  const existingSnSetRef = useRef(new Set()); // DB 상 시리얼
+  const normalizeSerial = (v) =>
+    String(v ?? "")
+      .trim()
+      .toUpperCase(); // 정규화
+
+  // 시리얼 번호 불러오기
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetchAssetSnList();
+
+        const list = res.data?.data ?? res.data ?? []; // ApiResponse 쓰면 data.data일 수도 있으니 둘 다 커버
+        const arr = Array.isArray(list) ? list : [];
+
+        existingSnSetRef.current = new Set(
+          arr.map(normalizeSerial).filter(Boolean)
+        );
+      } catch (e) {
+        console.error(e);
+        existingSnSetRef.current = new Set();
+      }
+    })();
+  }, []);
+
+  const rowSnMapRef = useRef(new Map()); // rowId -> normalizedSerial
+
+  // 폼 내 중복체크
+  const isDuplicateInForm = (next, currentRowId) => {
+    for (const [rid, sn] of rowSnMapRef.current.entries()) {
+      if (rid === currentRowId) continue;
+      if (sn === next) return true;
+    }
+    return false;
+  };
+
   const {
     control,
     handleSubmit,
@@ -61,7 +97,50 @@ export default function RegistFormDialog({ onClose, initialRows }) {
     mode: "onSubmit",
   });
 
-  // ✅ DataGrid id는 useFieldArray가 보장하는 keyName만 사용
+  // 시리얼번호 변경 감지
+  const handleSerialChange = useCallback(
+    (rowId, idx, raw) => {
+      const rid = String(rowId);
+      const next = normalizeSerial(raw);
+
+      // 이전 값 제거
+      rowSnMapRef.current.delete(rid);
+
+      // 폼 값 업데이트
+      setValue(`rows.${idx}.assetSn`, raw, { shouldDirty: true });
+
+      // 빈 값이면 OK
+      if (!next) {
+        clearErrors(`rows.${idx}.assetSn`);
+        return;
+      }
+
+      // DB 중복
+      if (existingSnSetRef.current.has(next)) {
+        setError(`rows.${idx}.assetSn`, {
+          type: "manual",
+          message: "이미 등록된 시리얼입니다.",
+        });
+        return;
+      }
+
+      // 현재 폼 내 중복
+      if (isDuplicateInForm(next, rid)) {
+        setError(`rows.${idx}.assetSn`, {
+          type: "manual",
+          message: "현재 입력 목록 내 중복 시리얼입니다.",
+        });
+        return;
+      }
+
+      // 통과
+      rowSnMapRef.current.set(rid, next);
+      clearErrors(`rows.${idx}.assetSn`);
+    },
+    [setValue, setError, clearErrors]
+  );
+
+  // DataGrid id는 useFieldArray가 보장하는 keyName만 사용
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: "rows",
@@ -70,7 +149,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
 
   const watchedRows = useWatch({ control, name: "rows" }) || [];
 
-  // ✅ DataGrid rows: fields(고유키) + watchedRows(값) 결합
+  // DataGrid rows: fields(고유키) + watchedRows(값) 결합
   const gridRows = useMemo(() => {
     return fields.map((f, idx) => {
       const v = watchedRows[idx] || {};
@@ -91,7 +170,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
     setSelectedUiIds([]);
   }, []);
 
-  // ✅ initialRows 주입: 딱 1번만
+  // initialRows 주입: 딱 1번만
   const didInitRef = useRef(false);
   useEffect(() => {
     if (!initialRows) return;
@@ -135,14 +214,14 @@ export default function RegistFormDialog({ onClose, initialRows }) {
     setAssetIdLoadingRows,
   });
 
-  // ✅ 행 추가 (deps에 append 반드시 포함)
+  // 행 추가 (deps에 append 반드시 포함)
   const addRow = useCallback(() => {
     clearSelection();
     append(makeEmptyRow());
     setBottomMsg("");
   }, [append, clearSelection]);
 
-  // ✅ 행 삭제: "gridRows를 기준으로 uiId -> __idx"로 변환해서 remove
+  // 행 삭제: "gridRows를 기준으로 uiId -> __idx"로 변환해서 remove
   const removeSelected = useCallback(() => {
     if (!selectedUiIds.length) {
       setBottomMsg("제거할 행을 선택하세요.");
@@ -165,6 +244,12 @@ export default function RegistFormDialog({ onClose, initialRows }) {
       if (hasText(r?.assetType) && hasText(r?.assetId)) {
         release(r.assetType, r.assetId);
       }
+    });
+
+    // 시리얼 번호 삭제
+    idxs.forEach((i) => {
+      const r = rows[i];
+      if (r?.rowId) rowSnMapRef.current.delete(String(r.rowId));
     });
 
     // 실제 삭제: 배열로 한 번에 제거
@@ -361,6 +446,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
     assetIdLoadingRows,
     handleEmpChange,
     handleAssetTypeChange,
+    handleSerialChange,
   });
 
   const handleSelectionChange = useCallback((model) => {

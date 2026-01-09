@@ -12,6 +12,7 @@ export function useRegistColumns({
   assetIdLoadingRows,
   handleEmpChange,
   handleAssetTypeChange,
+  handleSerialChange,
 }) {
   return useMemo(() => {
     const no = { sortable: false, filterable: false, disableColumnMenu: true };
@@ -148,7 +149,30 @@ export function useRegistColumns({
         headerName: "S/N",
         width: 180,
         ...no,
-        renderCell: textCell("assetSn"),
+        renderCell: (params) => {
+          const idx = params?.row?.__idx;
+          const rowId = params?.row?.rowId;
+          if (idx == null) return null;
+
+          return (
+            <Controller
+              name={`rows.${idx}.assetSn`}
+              control={control}
+              render={({ field, fieldState }) => (
+                <TextField
+                  size="small"
+                  value={field.value || ""}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error?.message || " "}
+                  onChange={(e) =>
+                    handleSerialChange(rowId, idx, e.target.value)
+                  }
+                  sx={{ width: "100%" }}
+                />
+              )}
+            />
+          );
+        },
       },
       {
         field: "empId",

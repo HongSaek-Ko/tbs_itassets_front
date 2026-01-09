@@ -1,11 +1,6 @@
 import * as XLSX from "xlsx";
 import dayjs from "dayjs";
 
-const normalizeSerial = (v) =>
-  String(v ?? "")
-    .trim()
-    .toUpperCase();
-
 /**
  * readExcelToObjects(arrayBuffer) => [{...}, ...]
  * - 첫 시트 기준
@@ -50,7 +45,7 @@ export function normalizeExcelDate(value) {
   // 문자열
   const s = String(value).trim();
 
-  // 흔한 포맷들 순차 시도
+  // 날짜 포맷들 순차 시도
   const candidates = [
     "YYYY-MM-DD",
     "YYYY/MM/DD",
@@ -64,7 +59,7 @@ export function normalizeExcelDate(value) {
   for (const f of candidates) {
     const d = dayjs(s, f, true);
     if (d.isValid()) {
-      // YYYY-MM만 들어온 경우, 일자는 01로 맞춰도 됨
+      // YYYY-MM만 들어온 경우, 일자는 01로 맞춰도 됨(원하면 오늘로)
       if (f === "YYYY-MM" || f === "YYYY/MM" || f === "YYYY.MM") {
         return d.date(1);
       }
@@ -87,72 +82,32 @@ export function normalizeExcelDate(value) {
  * ※ 여기서 "품번(assetId)"은 엑셀 값이 있으면 그대로,
  *   없으면 비워두고, 나중에 종류 선택/submit 시 자동 생성되게 둠.
  */
-export function excelRowToRegistInitial(excelRow, opts) {
-  const {
-    empIdSet, // 기존 직원 목록 Set (사번 검증용)
-    existingSnSet, // DB에 이미 존재하는 S/N Set
-    usedSnSet, // "이번 업로드(엑셀)" 내부 중복 체크용 Set
-    usedSnInFormSet, // 현재 폼(기존 행들)에서 이미 쓰고 있는 S/N Set
-  } = opts || {};
-
+export function excelRowToRegistInitial(excelRow) {
   const r = excelRow || {};
   const _errors = {};
 
   const get = (k) => (r[k] == null ? "" : String(r[k]).trim());
 
-  const assetId = get("품번");
-  const assetType = get("종류");
-  const assetManufacturer = get("제조사");
-  const manufacturedRaw = r["제조년월"];
-  const assetModelName = get("모델명");
-  const rawSn = get("S/N") || get("시리얼번호") || get("SN");
-  const sn = normalizeSerial(rawSn);
-  const empId = empIdSet?.has(empCandidate) ? empCandidate : "";
-  const assetLoc = get("설치장소");
-  const issuanceRaw = r["지급일"];
-  const assetDesc = get("비고");
+  const empId = get("사번");
+  const empName = get("성명");
+  const empPos = get("직위");
+  const teamName = get("소속");
+  const empRegDtRaw = r["입사일자"];
 
   // 날짜 파싱
-  const manufactured = normalizeExcelDate(manufacturedRaw);
-  if (manufacturedRaw && !manufactured) {
-    _errors.assetManufacturedAt = "날짜 형식이 올바르지 않습니다.";
-  }
-
-  const issuance = normalizeExcelDate(issuanceRaw);
-  if (issuanceRaw && !issuance) {
-    _errors.assetIssuanceDate = "날짜 형식이 올바르지 않습니다.";
-  }
-
-  // S/N 중복이면 비우기
-  let finalSn = rawSn; // 화면에는 원본 그대로 보여주고 싶으면 rawSn 유지
-
-  if (sn) {
-    const duplicated =
-      existingSnSet?.has(sn) || // DB 중복
-      usedSnInFormSet?.has(sn) || // 현재 폼과 중복
-      usedSnSet?.has(sn); // 엑셀 내부 중복
-
-    if (duplicated) {
-      finalSn = ""; //
-      _errors.assetSn = "S/N 중복 → 비움 처리됨";
-    } else {
-      usedSnSet?.add(sn);
-    }
+  const employeed = normalizeExcelDate(empRegDtRaw);
+  if (empRegDtRaw && !employeed) {
+    _errors.empRegDt = "날짜 형식이 올바르지 않습니다.";
   }
 
   return {
-    assetType,
-    assetId, // submit/종류변경 때 자동 생성
-    assetManufacturer,
-    assetManufacturedAt: manufactured ? manufactured.toDate() : null,
-    assetModelName,
-    assetSn: finalSn,
     empId,
-    assetLoc,
-    assetIssuanceDate: issuance ? issuance.toDate() : null,
-    assetDesc,
+    empName,
+    empPos,
+    teamName,
+    empRegDt: employeed ? employeed.toDate() : null,
 
-    // 엑셀 파싱 에러를 셀 에러로 표시
+    // 엑셀 파싱 에러를 셀 에러로 표시하기 위한 메타
     _errors,
   };
 }
@@ -161,34 +116,14 @@ export function excelRowToRegistInitial(excelRow, opts) {
  * 양식 다운로드용 xlsx 생성(헤더 + 예시 1행)
  * 브라우저에서 바로 다운로드
  */
-export function downloadAssetTemplateXlsx() {
-  const headers = [
-    "종류",
-    "제조사",
-    "제조년월",
-    "모델명",
-    "S/N",
-    "사번",
-    "설치장소",
-    "지급일",
-    "비고",
-  ];
+export function downloadEmpTemplateXlsx() {
+  const headers = ["사번", "성명", "직위", "소속", "입사일자"];
 
-  const example = [
-    "노트북",
-    "LG",
-    "2024-01-30",
-    "LG 그램",
-    "SN1234",
-    "E999",
-    "본사_3F",
-    "2024-02-01",
-    "예시 비고",
-  ];
+  const example = ["E999", "홍길동", "사원", "개발팀", "2026-01-01"];
 
   const ws = XLSX.utils.aoa_to_sheet([headers, example]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "assets");
+  XLSX.utils.book_append_sheet(wb, ws, "emp");
 
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const blob = new Blob([out], {
@@ -198,7 +133,7 @@ export function downloadAssetTemplateXlsx() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "자산_등록_양식.xlsx";
+  a.download = "직원_등록_양식.xlsx";
   a.click();
   URL.revokeObjectURL(url);
 }

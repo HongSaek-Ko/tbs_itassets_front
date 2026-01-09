@@ -20,6 +20,22 @@ export function exportEmpListExcel(params) {
   });
 }
 
+// 다음 사번 조회
+export const fetchNextEmpId = () => {
+  return axiosInstance.get("/emp/nextId");
+};
+
+// 전체 사번 조회
+export const fetchEmpIds = () => {
+  return axiosInstance.get("/emp/eIds");
+};
+
+// 직원 등록(벌크)
+export const createEmp = (payload) => {
+  console.log(payload);
+  return axiosInstance.post("/emp", payload);
+};
+
 // 직원 수정(벌크)
 export function updateEmpBulk(payload) {
   console.log("요청 객체: ", payload);

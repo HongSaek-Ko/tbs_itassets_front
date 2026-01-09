@@ -35,6 +35,9 @@ export default function CustomToolbar({
   // 신규 등록
   handleRegistForm,
 
+  // 신규 직원 등록
+  handleEmpRegForm,
+
   // 수정
   updateMode,
   editedUpdateCount,
@@ -71,16 +74,8 @@ export default function CustomToolbar({
           <Button
             size="small"
             color="primary"
-            sx={
-              titleText && {
-                backgroundColor: "#dee2e6",
-                color: "#adb5bd",
-                borderColor: "#e9ecef",
-              }
-            }
-            disabled={titleText}
             variant="outlined"
-            onClick={handleRegistForm}
+            onClick={titleText ? handleEmpRegForm : handleRegistForm} // 분기처리 -> titletext면 직원등록폼, 아니면 저거.
           >
             신규 {text} 등록
           </Button>

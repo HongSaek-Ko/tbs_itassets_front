@@ -9,7 +9,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-
+import CloseIcon from "@mui/icons-material/Close";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 
 import { DataGridText } from "../assets/DataGridText";
@@ -21,6 +21,9 @@ import ColumnFilterDialog from "../components/datagrid/ColumnFilterDialog";
 import { useEmpRows } from "./hooks/useEmpRows";
 import { useUpdateEmps } from "./hooks/useUpdateEmp";
 import { useResignEmps } from "./hooks/useResignEmp";
+import RegistEmpEntry from "./dialogs/RegistEmpEntry";
+import RegistEmpDialog from "./dialogs/RegistEmpDialog";
+import { IconButton } from "@mui/material";
 
 const paginationModelInit = { page: 0, pageSize: 50 };
 
@@ -90,6 +93,10 @@ export default function EmpDataTable({ title = "직원 목록" }) {
     title: "",
   });
 
+  const [registEntryOpen, setRegistEntryOpen] = useState(false);
+  const [registInitial, setRegistInitial] = useState(false);
+  const [registFormOpen, setRegistFormOpen] = useState(false);
+
   // 목록 로딩/검색/필터/엑셀
   const rowsState = useEmpRows({
     columnFilters,
@@ -99,13 +106,42 @@ export default function EmpDataTable({ title = "직원 목록" }) {
 
   const { loading, filteredRows, reloadRows, handleExport } = rowsState;
 
+  // 등록폼 열기
+  const handleEmpRegForm = () => {
+    setRegistInitial(null); // 빈 폼으로 설정(초기화)
+    setRegistEntryOpen(true); // 직접 작성/업로드 선택창
+  };
+
+  // 선택창 닫기
+  const closeEntry = () => setRegistEntryOpen(false);
+
+  // 직접 작성하기
+  const openDirectForm = () => {
+    setRegistInitial(null);
+    setRegistEntryOpen(false);
+    setRegistFormOpen(true);
+  };
+
+  // 엑셀 양식 적용 (자동 기입)
+  const openExcelPrefilledForm = (initialValues) => {
+    setRegistInitial(initialValues); // 폼 데이터를 엑셀에 작성된 데이터로 대입
+    setRegistEntryOpen(false); // 선택창 닫기
+    setRegistFormOpen(true); // 등록폼(작성폼) 열기
+  };
+
+  // 등록폼 닫기
+  const handleCloseRegist = () => {
+    setRegistFormOpen(false);
+    setRegistInitial(null);
+  };
+
   // 수정
   const update = useUpdateEmps({
     allRows: rowsState.allRows,
     setAllRows: rowsState.setAllRows,
   });
 
-  // 퇴사(삭제 대체)
+  // 퇴사
   const resign = useResignEmps({
     allRows: rowsState.allRows,
     setAllRows: rowsState.setAllRows,
@@ -250,6 +286,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
               onGlobalSearchChange: setGlobalSearch,
               onExport: handleExport,
               columnFilters,
+              handleEmpRegForm,
               onClearOneFilter: (field) => applyColumnFilter(field, ""),
               onResetAll: resetAllFilters,
 
@@ -337,7 +374,51 @@ export default function EmpDataTable({ title = "직원 목록" }) {
         }}
       />
 
-      {/* 퇴사 확인/오류 Dialog */}
+      {/* 신규 직원 등록: '엑셀 업로드' | '직접 작성' 선택창(Dialog) */}
+      <RegistEmpEntry
+        open={registEntryOpen}
+        onClose={closeEntry}
+        onPickDirect={openDirectForm}
+        onExcelPrefill={openExcelPrefilledForm}
+      />
+
+      {/* 신규 직원 등록 폼 (Dialog) */}
+      <Dialog
+        open={registFormOpen}
+        onClose={() => {}}
+        fullWidth
+        maxWidth="md"
+        PaperProps={{
+          sx: {
+            width: 1400,
+            maxWidth: "92vw",
+            m: "auto",
+            borderRadius: 2,
+          },
+        }}
+      >
+        <DialogTitle sx={{ pr: 6, position: "relative" }}>
+          <Typography fontWeight={800}>신규 직원 등록</Typography>
+          <IconButton
+            onClick={handleCloseRegist}
+            sx={{ position: "absolute", right: 12, top: 12 }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ pt: 2, pb: 3 }}>
+          <RegistEmpDialog
+            initialRows={registInitial} // 폼 초기값. 엑셀 업로드 시 해당 데이터로 대입 용도
+            onClose={() => {
+              handleCloseRegist();
+              reloadRows(); // 등록 성공 후 목록 갱신
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* 퇴사처리 확인 Dialog */}
       <Dialog
         open={resign.confirmOpen}
         onClose={() => resign.setConfirmOpen(false)}
@@ -365,6 +446,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
         </DialogActions>
       </Dialog>
 
+      {/* 퇴사처리 오류 Dialog */}
       <Dialog
         open={resign.errorOpen}
         onClose={() => resign.setErrorOpen(false)}
@@ -385,7 +467,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
         </DialogActions>
       </Dialog>
 
-      {/* 수정 확인/오류 Dialog */}
+      {/* 수정 확인 Dialog */}
       <Dialog
         open={update.confirmOpen}
         onClose={() => update.setConfirmOpen(false)}
@@ -409,6 +491,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
         </DialogActions>
       </Dialog>
 
+      {/* 수정 오류 Dialog */}
       <Dialog
         open={update.errorOpen}
         onClose={() => update.setErrorOpen(false)}
