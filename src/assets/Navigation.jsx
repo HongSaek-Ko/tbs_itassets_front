@@ -7,7 +7,13 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionIcon from "@mui/icons-material/Description";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
-import { People } from "@mui/icons-material";
+import {
+  Delete,
+  DesktopAccessDisabled,
+  History,
+  People,
+  TableView,
+} from "@mui/icons-material";
 
 export const Navigation = [
   {
@@ -48,12 +54,17 @@ export const Navigation = [
       {
         segment: "assetList",
         title: "현재 자산",
-        icon: <DescriptionIcon />,
+        icon: <TableView />,
       },
       {
         segment: "assetList/disposed",
         title: "폐기 자산",
-        icon: <DescriptionIcon />,
+        icon: <DesktopAccessDisabled />,
+      },
+      {
+        segment: "assetHistory",
+        title: "변동 이력",
+        icon: <History />,
       },
     ],
   },

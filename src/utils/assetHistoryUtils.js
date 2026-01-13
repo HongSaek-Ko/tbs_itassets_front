@@ -36,9 +36,7 @@ export function isDisposeHistoryRow(row) {
 
 export function formatHistoryDate(v) {
   if (!v) return "";
-  console.log("시간?: ", v);
   const time = dayjs(v).format("YYYY-MM-DD HH:mm:ss");
-  console.log(time);
   return time;
 }
 

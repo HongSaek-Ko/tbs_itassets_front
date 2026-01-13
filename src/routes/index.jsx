@@ -68,6 +68,7 @@ const AppRouter = () => {
               <Route path="/" element={<AssetList />} />
               <Route path="/assetList" element={<AssetList />} />
               <Route path="/assetList/disposed" element={<DisposedList />} />
+              <Route path="/assetHistory" element={<History />} />
               <Route path="/emp" element={<EmpList />} />
               {/* <Route path="/emp/history" element={<History />} /> */}
               {/* 그 외 라우트 추가하고 싶으면 여기 계속 추가하면 됨 */}

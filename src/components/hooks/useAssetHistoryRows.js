@@ -28,11 +28,13 @@ export function useAssetHistoryRows(assetId, open) {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
   // 엑셀 export(서버 기준)
   const handleExport = async (str) => {
     // const params = { ...(columnFilters || {}), globalSearch, assetStatus };
     console.log("이건가?", str);
-    const text = str.assetId;
+    const text = str ? str.assetId : "TOTAL";
+    console.log(text);
     const res = await exportAssetHistory(text);
     const blob = new Blob([res.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -40,7 +42,7 @@ export function useAssetHistoryRows(assetId, open) {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${text}_변동이력_${new Date()
+    a.download = `${text == "TOTAL" ? "전체" : text}_변동이력_${new Date()
       .toISOString()
       .slice(0, 10)}.xlsx`;
     document.body.appendChild(a);
@@ -49,8 +51,11 @@ export function useAssetHistoryRows(assetId, open) {
     window.URL.revokeObjectURL(url);
   };
 
+  // 전체 export
+  const totalExport = async (str) => {};
+
   useEffect(() => {
-    if (!open || !assetId) return;
+    // if (!open || !assetId) return;
 
     let alive = true;
 
@@ -59,7 +64,7 @@ export function useAssetHistoryRows(assetId, open) {
       setErrorMsg("");
 
       try {
-        const res = await fetchAssetHistory(assetId);
+        const res = await fetchAssetHistory(assetId ? assetId : "TOTAL");
         const body = res?.data?.data ?? res?.data ?? [];
         const arr = Array.isArray(body) ? body : [];
 
@@ -81,7 +86,7 @@ export function useAssetHistoryRows(assetId, open) {
             );
 
             return {
-              // ✅ DataGrid row id로 쓸 값
+              // DataGrid row id로 쓸 값
               assetHistoryId,
 
               assetId: String(pick(r, ["assetId", "asset_id"], assetId)),

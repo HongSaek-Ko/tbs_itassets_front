@@ -70,14 +70,18 @@ export default function AssetHistoryToolbar({
           "& .MuiInputBase-input": { padding: "4px 6px" },
         }}
       />
-      <Button
-        size="small"
-        variant="outlined"
-        color="success"
-        onClick={() => onExport({ assetId })}
-      >
-        {`엑셀(.xlsx) 내보내기`}
-      </Button>
+      {assetId ? (
+        <Button
+          size="small"
+          variant="outlined"
+          color="success"
+          onClick={() => onExport({ assetId })}
+        >
+          {`엑셀(.xlsx) 내보내기`}
+        </Button>
+      ) : (
+        <></>
+      )}
     </Box>
   );
 }

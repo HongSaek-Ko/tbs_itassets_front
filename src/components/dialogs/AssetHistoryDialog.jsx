@@ -157,7 +157,6 @@ export default function AssetHistoryDialog({ open, assetId, onClose }) {
             localeText={DataGridText}
             getRowClassName={(params) => {
               const r = params.row;
-              console.log(r);
               if (isDisposeHistoryRow(r)) return "row-dispose";
               if (isTransferHistoryRow(r)) return "row-transfer";
               if (isFirstHistoryRow(r)) return "row-first";
