@@ -31,7 +31,7 @@ export default function RegistEntryDialog({
   const [empList, setEmpList] = useState([]);
   const [empLoading, setEmpLoading] = useState(false);
 
-  const [snSet, setSnSet] = useState(() => new Set()); // ✅ DB에 이미 존재하는 SN Set
+  const [snSet, setSnSet] = useState(() => new Set()); // DB에 이미 존재하는 SN Set
   const [snLoading, setSnLoading] = useState(false);
 
   const [bottomMsg, setBottomMsg] = useState("");
@@ -44,7 +44,7 @@ export default function RegistEntryDialog({
       setEmpLoading(true);
       setSnLoading(true);
       try {
-        // ✅ 병렬 로드
+        // 병렬 로드
         const [empRes, snRes] = await Promise.allSettled([
           fetchEmpList(),
           fetchAssetSnList(),
@@ -61,7 +61,7 @@ export default function RegistEntryDialog({
 
         // 시리얼 목록
         if (snRes.status === "fulfilled") {
-          const body = snRes.value.data?.data ?? snRes.value.data; // 자네 응답 구조대로
+          const body = snRes.value.data?.data ?? snRes.value.data;
           const arr = Array.isArray(body) ? body : [];
           const next = new Set(
             arr

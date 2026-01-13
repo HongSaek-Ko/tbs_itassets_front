@@ -60,8 +60,10 @@ export default function RegistFormDialog({ onClose, initialRows }) {
       try {
         const res = await fetchAssetSnList();
 
-        const list = res.data?.data ?? res.data ?? []; // ApiResponse 쓰면 data.data일 수도 있으니 둘 다 커버
+        const list = res.data?.data ?? res.data ?? []; // ApiResponse라서 data.data일 수도 있으니 둘 다 커버
         const arr = Array.isArray(list) ? list : [];
+
+        console.log("시리얼 번호:", arr);
 
         existingSnSetRef.current = new Set(
           arr.map(normalizeSerial).filter(Boolean)
@@ -427,13 +429,13 @@ export default function RegistFormDialog({ onClose, initialRows }) {
         assetDesc: String(r.assetDesc).trim(),
       }));
 
-      try {
-        await createAsset(payloads);
+      const res = await createAsset(payloads);
+      if (res.data.success == true) {
         onClose?.();
         window.location.reload();
-      } catch (e) {
-        console.error(e);
-        setBottomMsg("자산 등록에 실패했습니다.");
+      } else {
+        console.log(res);
+        setBottomMsg("자산 등록에 실패했습니다. 입력한 데이터를 확인해주세요.");
       }
     },
     [ensureAssetIds, onClose, validateRows]

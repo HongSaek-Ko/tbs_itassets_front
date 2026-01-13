@@ -27,7 +27,7 @@ import { useDisposeAssets } from "./hooks/useDisposeAssets";
 // 신규 등록 폼
 import RegistFormDialog from "../components/dialogs/RegistFormDialog";
 
-// ✅ 정보 수정
+// 정보 수정
 import { useUpdateAssets } from "./hooks/useUpdateAssets";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -349,18 +349,18 @@ export default function AssetDataTable({ assetStatus, title }) {
                 onClearOneFilter: (field) => applyColumnFilter(field, ""),
                 onResetAll: resetAllFilters,
 
-                // ✅ 신규 자산 등록
+                // 신규 자산 등록
                 handleRegistForm,
                 assetStatus,
 
-                // ✅ 폐기(원본 기능 + 버튼 토글은 CustomToolbar에서 처리)
+                // 폐기(원본 기능 + 버튼 토글은 CustomToolbar에서 처리)
                 disposeMode: assetStatus !== "N" && dispose.disposeMode,
                 tgDisposeMode:
                   assetStatus !== "N" ? dispose.toggleDisposeMode : undefined,
                 selectionModel: dispose.selectionModel,
                 onDispose: dispose.onClickDisposeFinal,
 
-                // ✅ 수정(추가)
+                // 수정(추가)
                 updateMode: assetStatus !== "N" && update.updateMode,
                 editedUpdateCount: update.editedCount,
                 onToggleUpdateMode: update.toggleUpdateMode,
