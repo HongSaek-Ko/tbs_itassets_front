@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { exportAssetHistory, fetchAssetHistory } from "../../api/assetAPIS";
+import {
+  exportAssetHistory,
+  exportTotalHistory,
+  fetchAssetHistory,
+} from "../../api/assetAPIS";
 import dayjs from "dayjs";
 
 const pick = (obj, keys, fallback = "") => {
@@ -52,7 +56,22 @@ export function useAssetHistoryRows(assetId, open) {
   };
 
   // 전체 export
-  const totalExport = async (str) => {};
+  const totalExport = async (columnFilters, globalSearch) => {
+    const params = { ...(columnFilters || {}), globalSearch };
+    console.log(params);
+    const res = await exportTotalHistory(params);
+    const blob = new Blob([res.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `이력_목록_${new Date().toISOString().slice(0, 10)}.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     // if (!open || !assetId) return;
@@ -128,5 +147,5 @@ export function useAssetHistoryRows(assetId, open) {
     };
   }, [assetId, open]);
 
-  return { rows, loading, errorMsg, handleExport };
+  return { rows, loading, errorMsg, handleExport, totalExport };
 }

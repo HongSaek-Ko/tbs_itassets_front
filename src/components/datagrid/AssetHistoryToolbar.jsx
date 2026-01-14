@@ -5,13 +5,6 @@ import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 
-const FIELD_LABEL = {
-  displayId: "이력 번호",
-  assetHoldEmp: "현재 소유자",
-  assetHistoryDesc: "변동 사유",
-  assetHistoryDate: "변동 시간",
-};
-
 export default function AssetHistoryToolbar({
   globalSearch,
   onGlobalSearchChange,
@@ -20,10 +13,27 @@ export default function AssetHistoryToolbar({
   onResetAll,
   assetId,
   onExport,
+  totalExport,
+  isTotal,
 }) {
+  const [fieldLabel, setFieldLabel] = React.useState({
+    displayId: "이력 번호",
+    assetHoldEmp: "현재 소유자",
+    assetHistoryDesc: "변동 사유",
+    assetHistoryDate: "변동 시간",
+  });
+  // 전체 자산 변동 이력 페이지인 경우에는 Label에 assetId 추가
+  React.useEffect(() => {
+    if (isTotal) {
+      setFieldLabel({
+        ...fieldLabel,
+        assetId: "자산 번호",
+      });
+    }
+  }, []);
   const chips = Object.entries(columnFilters || {})
     .filter(([, v]) => String(v || "").trim().length > 0)
-    .map(([k, v]) => ({ key: k, label: `${FIELD_LABEL[k] ?? k}: ${v}` }));
+    .map(([k, v]) => ({ key: k, label: `${fieldLabel[k] ?? k}: ${v}` }));
 
   return (
     <Box
@@ -80,7 +90,14 @@ export default function AssetHistoryToolbar({
           {`엑셀(.xlsx) 내보내기`}
         </Button>
       ) : (
-        <></>
+        <Button
+          size="small"
+          variant="outlined"
+          color="success"
+          onClick={() => totalExport(columnFilters, globalSearch)}
+        >
+          {`엑셀(.xlsx) 내보내기`}
+        </Button>
       )}
     </Box>
   );

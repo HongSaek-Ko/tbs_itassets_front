@@ -87,7 +87,7 @@ export default function CustomColumnMenu(props) {
         {colDef.headerName || colDef.field}
       </Typography>
 
-      {/* 🔍 필터가 필요한 컬럼에만 노출 */}
+      {/* 필터가 필요한 컬럼에만 노출 */}
       {isFilterable && (
         <>
           <MenuItem onClick={handleFilter}>
@@ -100,7 +100,7 @@ export default function CustomColumnMenu(props) {
         </>
       )}
 
-      {/* 🔽 정렬이 필요한 컬럼에만 노출 */}
+      {/* 정렬이 필요한 컬럼에만 노출 */}
       {isSortable && (
         <>
           <MenuItem onClick={handleSortAsc}>

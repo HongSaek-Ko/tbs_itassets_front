@@ -1,5 +1,5 @@
 import { totalHistoryColumns } from "../utils/assetTotalHistoryColumns";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, DialogContent, Paper, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import { useEffect, useMemo, useState } from "react";
 import CustomColumnMenu from "./datagrid/CustomColumnMenu";
@@ -38,6 +38,8 @@ const emptyFilters = {
   assetHistoryDate: "",
 };
 
+const FILTERABLE_FIELDS = ["assetId", "assetHoldEmp"];
+
 const SORTABLE_FIELDS = ["assetId", "assetHistoryDate", "assetHoldEmp"];
 
 export default function HistoryDataTable({}) {
@@ -49,6 +51,7 @@ export default function HistoryDataTable({}) {
     loading,
     errorMsg,
     handleExport,
+    totalExport,
   } = useAssetHistoryRows(null, false);
 
   const [paginationModel, setPaginationModel] = useState(paginationModelInit);
@@ -58,6 +61,7 @@ export default function HistoryDataTable({}) {
     title: "",
   });
   const columns = useMemo(() => totalHistoryColumns(), []);
+  const isTotal = true;
 
   useEffect(() => {
     setColumnFilters(emptyFilters);
@@ -122,16 +126,19 @@ export default function HistoryDataTable({}) {
             toolbar: {
               globalSearch,
               onExport: handleExport,
+              totalExport: totalExport,
               onGlobalSearchChange: setGlobalSearch,
               columnFilters,
-              onClearOneFilter: (field) => applyColumnFilters(field, ""),
+              onClearOneFilter: (field) => applyColumnFilter(field, ""),
               onResetAll: resetAllFilters,
+              isTotal,
             },
             columnMenu: {
               openColumnFilterDialog,
               columnFilters,
               setColumnFilters,
               sortableFields: SORTABLE_FIELDS,
+              filterableFields: FILTERABLE_FIELDS,
             },
           }}
           // pagination

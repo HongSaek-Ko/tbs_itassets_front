@@ -61,3 +61,12 @@ export const exportAssetHistory = (assetId) => {
     responseType: "arraybuffer",
   });
 };
+
+// 이력 내보내기
+export const exportTotalHistory = (params) => {
+  return axiosInstance.get(`/assets/history/export`, {
+    // return axiosInstance.get("/excel", {
+    params,
+    responseType: "arraybuffer",
+  });
+};
