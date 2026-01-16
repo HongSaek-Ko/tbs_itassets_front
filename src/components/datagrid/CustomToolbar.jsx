@@ -5,6 +5,7 @@ import TextField from "@mui/material/TextField";
 import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import { useLocation } from "react-router-dom";
+import { usePerm } from "../../utils/usePerms";
 
 const FIELD_LABEL = {
   assetType: "종류",
@@ -45,7 +46,11 @@ export default function CustomToolbar({
   onSaveUpdates,
 }) {
   const location = useLocation();
+  const { hasFor } = usePerm();
+
   const isEmp = location.pathname.includes("emp");
+  const resource = isEmp ? "emp" : "asset";
+  const canWrite = hasFor(resource, "write");
   const text = isEmp ? "직원" : "자산";
   const deleteText = isEmp ? "퇴사 처리" : "폐기할 자산";
 
@@ -69,43 +74,52 @@ export default function CustomToolbar({
       }}
     >
       {/* 신규 등록, 정보 수정 */}
+      {/* 버튼 렌더링 조건은 권한 정보가 우선시 */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", gap: 1 }}>
-        {assetStatus !== "N" && (
-          <Button
-            size="small"
-            color="primary"
-            variant="outlined"
-            onClick={titleText ? handleEmpRegForm : handleRegistForm} // 분기처리 -> titletext면 직원등록폼, 아니면 저거.
-          >
-            신규 {text} 등록
-          </Button>
-        )}
-        <Button
-          size="small"
-          color="primary"
-          variant={
-            updateMode && editedUpdateCount > 0 ? "contained" : "outlined"
-          }
-          onClick={() => {
-            if (updateMode && editedUpdateCount > 0) onSaveUpdates?.();
-            else onToggleUpdateMode?.();
-          }}
-        >
-          {updateMode && editedUpdateCount > 0 ? "수정 정보 저장" : "정보 수정"}
-        </Button>
-        {/* 폐기 버튼: “한 자리에서” 토글 */}
-        {assetStatus !== "N" && (
-          <Button
-            size="small"
-            color="error"
-            variant={disposeMode && hasSelection ? "contained" : "outlined"}
-            onClick={() => {
-              if (disposeMode && hasSelection) onDispose?.();
-              else tgDisposeMode?.(); // 선택 없거나 모드 아니면: 모드 토글
-            }}
-          >
-            {disposeMode && hasSelection ? "선택 확인" : `${deleteText} 선택`}
-          </Button>
+        {canWrite && (
+          <>
+            {assetStatus !== "N" && (
+              <Button
+                size="small"
+                color="primary"
+                variant="outlined"
+                onClick={titleText ? handleEmpRegForm : handleRegistForm} // 분기처리 -> titletext면 직원등록폼, 아니면 저거.
+              >
+                신규 {text} 등록
+              </Button>
+            )}
+            <Button
+              size="small"
+              color="primary"
+              variant={
+                updateMode && editedUpdateCount > 0 ? "contained" : "outlined"
+              }
+              onClick={() => {
+                if (updateMode && editedUpdateCount > 0) onSaveUpdates?.();
+                else onToggleUpdateMode?.();
+              }}
+            >
+              {updateMode && editedUpdateCount > 0
+                ? "수정 정보 저장"
+                : "정보 수정"}
+            </Button>
+            {/* 폐기 버튼: "한 자리에서" 토글 */}
+            {assetStatus !== "N" && (
+              <Button
+                size="small"
+                color="error"
+                variant={disposeMode && hasSelection ? "contained" : "outlined"}
+                onClick={() => {
+                  if (disposeMode && hasSelection) onDispose?.();
+                  else tgDisposeMode?.(); // 선택 없거나 모드 아니면: 모드 토글
+                }}
+              >
+                {disposeMode && hasSelection
+                  ? "선택 확인"
+                  : `${deleteText} 선택`}
+              </Button>
+            )}
+          </>
         )}
       </Box>
 

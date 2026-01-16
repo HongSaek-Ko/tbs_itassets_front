@@ -11,6 +11,8 @@ import AssetList from "../pages/AssetList";
 import DisposedList from "../pages/DisposedList";
 import EmpList from "../pages/EmpList";
 import History from "../pages/History";
+import Login from "../pages/Login";
+import Signup from "../pages/Signup";
 
 const HEADER_HEIGHT = 64;
 
@@ -65,6 +67,8 @@ const AppRouter = () => {
           >
             <Routes>
               {/* "/" → 대시보드(Home). 헤더/사이드바 안쪽 내용물만 바뀜 */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               <Route path="/" element={<AssetList />} />
               <Route path="/assetList" element={<AssetList />} />
               <Route path="/assetList/disposed" element={<DisposedList />} />
