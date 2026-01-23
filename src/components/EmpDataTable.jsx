@@ -25,6 +25,9 @@ import RegistEmpEntry from "./dialogs/RegistEmpEntry";
 import RegistEmpDialog from "./dialogs/RegistEmpDialog";
 import { IconButton } from "@mui/material";
 
+import { useAuthStore } from "./hooks/useAuthStore";
+import { EmpAuthCell } from "./dialogs/EmpAuthCell";
+
 const paginationModelInit = { page: 0, pageSize: 50 };
 
 function NoRowsOverlay() {
@@ -81,6 +84,12 @@ const empPosComparator = (v1, v2) => {
 };
 
 export default function EmpDataTable({ title = "직원 목록" }) {
+  const myAuth = useAuthStore((s) => s.user?.auth ?? []);
+  const isAdmin =
+    myAuth.includes("AUTH_ADMIN") || // AUTH로 오면 이걸로
+    myAuth.includes("PERM_ADMIN"); // 혹시 따로 있으면
+  console.log("myAuth=", myAuth, "isAdmin=", isAdmin);
+
   const apiRef = useGridApiRef();
 
   const [paginationModel, setPaginationModel] = useState(paginationModelInit);
@@ -183,19 +192,41 @@ export default function EmpDataTable({ title = "직원 목록" }) {
         field: "empPos",
         headerName: "직위",
         width: 140,
-        // DataGrid 정렬은 comparator가 담당
         sortComparator: empPosComparator,
       },
       { field: "teamName", headerName: "소속", width: 180 },
       { field: "empStatus", headerName: "재직 상태", width: 140 },
+
+      ...(isAdmin
+        ? [
+            {
+              field: "auth",
+              headerName: "권한",
+              minWidth: 280,
+              sortable: false,
+              filterable: false,
+              renderCell: (params) => (
+                <EmpAuthCell
+                  row={params.row}
+                  updateMode={update.updateMode}
+                  isAdmin={isAdmin}
+                  setAllRows={rowsState.setAllRows}
+                />
+              ),
+            },
+          ]
+        : []),
     ];
 
     return update.patchColumns(base);
   }, [
+    isAdmin,
+    rowsState.setAllRows,
     update.updateMode,
     update.editedCellsMap,
     update.teamNames,
     update.empPos,
+    update.patchColumns,
   ]);
 
   // 편집 핸들러
@@ -361,7 +392,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
         open={filterDialog.open}
         title={filterDialog.title}
         value={
-          filterDialog.field ? columnFilters[filterDialog.field] ?? "" : ""
+          filterDialog.field ? (columnFilters[filterDialog.field] ?? "") : ""
         }
         onClose={closeColumnFilterDialog}
         onApply={(value) => {

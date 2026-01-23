@@ -74,7 +74,7 @@ export default function CustomToolbar({
       }}
     >
       {/* 신규 등록, 정보 수정 */}
-      {/* 버튼 렌더링 조건은 권한 정보가 우선시 */}
+      {/* 버튼 렌더링 조건: 1. ((URL) + (접속 중인 사용자의 권한(auth))) 2. titleText */}
       <Box sx={{ flex: 1, minWidth: 0, display: "flex", gap: 1 }}>
         {canWrite && (
           <>

@@ -8,6 +8,7 @@ const initialState = {
   user: {
     userId: "",
     name: "",
+    status: "",
     auth: [], // ["PERM_ASSET_WRITE", ...]
   },
 };
@@ -23,6 +24,7 @@ export const useAuthStore = create(
           user: {
             userId: user.userId,
             name: user.name,
+            status: user.status,
             auth: user.auth ?? [],
           },
         }),
@@ -48,6 +50,6 @@ export const useAuthStore = create(
         isLogin: s.isLogin,
         user: s.user,
       }),
-    }
-  )
+    },
+  ),
 );

@@ -69,9 +69,9 @@ const Login = () => {
             로그인
           </Button>
 
-          <Button variant="outlined" onClick={() => navigate("/signup")}>
+          {/* <Button variant="outlined" onClick={() => navigate("/signup")}>
             회원가입
-          </Button>
+          </Button> */}
         </Box>
       </Paper>
 

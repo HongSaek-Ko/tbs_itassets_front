@@ -7,6 +7,7 @@ export function usePerm() {
   const has = (perm) => isLogin && (auth ?? []).includes(perm);
 
   // ex) TB_AUTH: 'AUTH_FA' -> (some logic...) -> auth: ['PERM_ASSET_WRITE']
+  // resource: emp -> PERM_HR_WRITE / asset -> PERM_ASSET_WRITE
   const hasFor = (resource, action) => {
     const table = {
       asset: { write: "PERM_ASSET_WRITE" },

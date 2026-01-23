@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -27,6 +27,13 @@ const Header = ({ toggleSidebar }) => {
   const [editOpen, setEditOpen] = useState(false);
   const [logoutOpen, setLogoutOpen] = useState(false);
 
+  useEffect(() => {
+    if (user.status === "NEW") {
+      alert("비밀번호 수정이 필요합니다!");
+      setEditOpen(true);
+    }
+    console.log("user?", user);
+  }, [isLogin]);
   const display = useMemo(() => {
     if (!isLogin) return "미접속";
     return `${user?.name ?? ""} (${user?.userId ?? ""})`;
