@@ -13,7 +13,7 @@ export const ALL_AUTH_CODES = ["AUTH_FA", "AUTH_HR", "AUTH_ADMIN"];
 export function getRowAuthCodes(row) {
   // 자네 실제 row 키에 맞춰 필요하면 여기만 고치면 되네
   const a = row?.auth ?? row?.authCodes ?? row?.userAuth ?? [];
-  console.log(row);
+  row;
   return Array.isArray(a) ? a : [];
 }
 
@@ -64,7 +64,7 @@ export function useEmpAuthActions({ setAllRows }) {
     try {
       if (mode === "grant") {
         if (!current.includes(authCode)) {
-          console.log("reqs: ", userId, authCode);
+          ("reqs: ", userId, authCode);
           await grantUserAuth({ userId, authCode });
           applyAuthToRow(userId, [...current, authCode]);
         }

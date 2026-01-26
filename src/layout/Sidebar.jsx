@@ -1,5 +1,5 @@
 // src/components/layout/Sidebar.jsx
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 // import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
@@ -13,7 +13,6 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 
 import { Navigation } from "../assets/Navigation";
-import { useState } from "react";
 
 const drawerWidth = 260;
 
@@ -21,26 +20,24 @@ function Sidebar({ sidebarOpen }) {
   const location = useLocation();
   const [openFolder, setOpenFolder] = useState(true);
 
-  // 클릭 기반 강조(최소 변경)
-  const [activeSegment, setActiveSegment] = useState(null);
-
-  const currentSegment = useMemo(() => {
-    const path = location.pathname.split("/")[1] || "dashboard";
-    return path;
+  // 전체 경로를 segment로 사용: "assetList/disposed" 까지 잡음
+  const currentPath = useMemo(() => {
+    const p = String(location.pathname || "")
+      .replace(/^\/+/, "")
+      .replace(/\/+$/, "");
+    return p || "dashboard";
   }, [location.pathname]);
 
+  // 현재 위치가 자산 폴더면 자동으로 펼쳐두기(선택 사항)
   useEffect(() => {
-    setActiveSegment(currentSegment);
-  }, [currentSegment]);
+    if (currentPath.startsWith("assetList")) setOpenFolder(true);
+  }, [currentPath]);
 
   const handleFolderToggle = () => {
     setOpenFolder((prev) => !prev);
   };
 
-  // 공통 클릭 핸들러
-  const handleSelect = (segment) => () => {
-    setActiveSegment(segment);
-  };
+  const isSelected = (seg) => currentPath === seg;
 
   return (
     <Box
@@ -84,8 +81,7 @@ function Sidebar({ sidebarOpen }) {
                         to={`/${child.segment}`}
                         sx={{ pl: 4 }}
                         // 클릭한 메뉴 기준으로 selected
-                        selected={activeSegment === child.segment}
-                        onClick={handleSelect(child.segment)}
+                        selected={isSelected(child.segment)}
                       >
                         {child.icon && (
                           <ListItemIcon>{child.icon}</ListItemIcon>
@@ -123,10 +119,7 @@ function Sidebar({ sidebarOpen }) {
               to={`/${item.segment === "dashboard" ? "" : item.segment}`}
               disabled={disabled}
               // 클릭한 메뉴 기준으로 selected
-              selected={
-                activeSegment === item.segment || item.segment === "selected"
-              }
-              onClick={handleSelect(item.segment)}
+              selected={isSelected(item.segment) || item.segment === "selected"}
             >
               {item.icon && <ListItemIcon>{item.icon}</ListItemIcon>}
               <ListItemText primary={item.title} />

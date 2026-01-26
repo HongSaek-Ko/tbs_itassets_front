@@ -23,16 +23,16 @@ const HeaderWithFilterIcon = ({ title, active }) => {
   );
 };
 // 날짜 -> YYYY-MM-DD 변환
-function getFormattedDate(date) {
-  const convert = new Date(date);
-  const year = convert.getFullYear(); // 년도 가져오기 (yyyy)
-  // getMonth()는 0부터 시작하므로 +1, 두 자리로 만들기 위해 '0' 추가
-  const month = (1 + convert.getMonth()).toString().padStart(2, "0");
-  // getDate()는 일(day)을 가져오고, 두 자리로 만들기 위해 '0' 추가
-  const day = convert.getDate().toString().padStart(2, "0");
+// function getFormattedDate(date) {
+//   const convert = new Date(date);
+//   const year = convert.getFullYear(); // 년도 가져오기 (yyyy)
+//   // getMonth()는 0부터 시작하므로 +1, 두 자리로 만들기 위해 '0' 추가
+//   const month = (1 + convert.getMonth()).toString().padStart(2, "0");
+//   // getDate()는 일(day)을 가져오고, 두 자리로 만들기 위해 '0' 추가
+//   const day = convert.getDate().toString().padStart(2, "0");
 
-  return `${year}-${month}-${day}`; // yyyy-MM-dd 형식으로 반환
-}
+//   return `${year}-${month}-${day}`; // yyyy-MM-dd 형식으로 반환
+// }
 
 export const getColumns = (columnFilters) => [
   { field: "assetId", headerName: "품번", width: 90 },
@@ -56,9 +56,10 @@ export const getColumns = (columnFilters) => [
     width: 140,
     sortable: false,
     valueFormatter: (params) => {
-      return params.value
-        ? String(params.value).slice(0, 10)
-        : getFormattedDate(params);
+      // return params.value
+      //   ? String(params.value).slice(0, 10)
+      //   : getFormattedDate(params);
+      return params.value ? String(params.value).slice(0, 10) : "";
     },
     renderHeader: () => (
       <HeaderWithFilterIcon title="제조년월" active={false} />
@@ -126,9 +127,10 @@ export const getColumns = (columnFilters) => [
     sortable: true,
     valueFormatter: (params) => {
       // 날짜 포맷 필요하면 여기서
-      return params.value
-        ? String(params.value).slice(0, 10)
-        : getFormattedDate(params);
+      // return params.value
+      //   ? String(params.value).slice(0, 10)
+      //   : getFormattedDate(params);
+      return params.value ? String(params.value).slice(0, 10) : "";
     },
     renderHeader: () => <HeaderWithFilterIcon title="지급일" active={false} />,
   },

@@ -33,22 +33,27 @@ export function useUpdateEmps({ allRows, setAllRows, apiref }) {
 
   useEffect(() => {
     if (!updateMode) return;
+    if (teamNames.length > 0 && empPos.length > 0) return;
+
     const load = async () => {
       try {
-        const teamList = await fetchTeamNameList();
-        const posList = await fetchEmpPosList();
-        setTeamNames(...[teamList.data]);
-        setEmpPos(...[posList.data.data]);
+        const teamRes = await fetchTeamNameList();
+        const posRes = await fetchEmpPosList();
+
+        const teams = teamRes.data?.data ?? teamRes.data ?? [];
+        const poses = posRes.data?.data ?? posRes.data ?? [];
+
+        setTeamNames(Array.isArray(teams) ? teams : []);
+        setEmpPos(Array.isArray(poses) ? poses : []);
       } catch (e) {
         console.error(e);
         setTeamNames([]);
         setEmpPos([]);
       }
     };
+
     load();
-    console.log(teamNames);
-    console.log(empPos);
-  }, [updateMode, teamNames.length]);
+  }, [updateMode, teamNames.length, empPos.length]);
 
   const toggleUpdateMode = () => {
     setUpdateMode((prev) => {
@@ -221,7 +226,7 @@ export function useUpdateEmps({ allRows, setAllRows, apiref }) {
           const rid = String(r.empId ?? r.id);
           const draft = draftRows[rid];
           return draft ? { ...r, ...draft } : r;
-        })
+        }),
       );
 
       setConfirmOpen(false);

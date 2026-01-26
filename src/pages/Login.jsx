@@ -31,7 +31,7 @@ const Login = () => {
   const onSubmit = async (data) => {
     try {
       const res = await postLogin(data);
-      console.log(res.data.data);
+      res.data.data;
       login(res.data.data);
       navigate("/", { replace: true });
     } catch (e) {

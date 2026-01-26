@@ -37,19 +37,19 @@ export const fetchAssetSnList = () => {
 
 // 자산 등록
 export const createAsset = (payload) => {
-  console.log(payload);
+  //  (payload);
   return axiosInstance.post("/assets", payload);
 };
 
 // 자산 수정
 export const updateAssetBulk = (payload) => {
-  console.log("수정 요청 목록: ", payload);
+  //  ("수정 요청 목록: ", payload);
   return axiosInstance.patch("/assets/bulkUpdate", payload);
 };
 
 // 자산 변동 이력
 export const fetchAssetHistory = (assetId) => {
-  // console.log("요청 ID?", assetId);
+  //  ("요청 ID?", assetId);
   return axiosInstance.get(`/assets/history/${assetId}`);
 };
 

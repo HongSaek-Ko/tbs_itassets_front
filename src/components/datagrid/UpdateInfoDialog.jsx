@@ -24,7 +24,7 @@ const schema = yup.object({
     .transform((v) => (v?.trim() ? v : null))
     .when("$user", {
       is: (v) => {
-        console.log("v?", v);
+        ("v?", v);
         return v?.status === "NEW";
       },
       then: (s) => s.required("신규 사용자는 비밀번호 초기화가 필요합니다."),
@@ -63,13 +63,13 @@ export function UpdateInfoDialog({ open, onClose }) {
 
   const onSubmit = async (data) => {
     try {
-      console.log("req Data?", data);
+      ("req Data?", data);
       const res = await putMe({
         username: data.username,
         newPassword: data.newPassword ?? null,
       });
 
-      console.log("res?", res);
+      ("res?", res);
       const body = res.data?.data ?? res.data;
 
       setUser({
@@ -82,7 +82,7 @@ export function UpdateInfoDialog({ open, onClose }) {
 
       reset({ username: body.name, newPassword: "" });
     } catch (e) {
-      console.log(e);
+      e;
       setErrorMsg(e?.response?.data?.message ?? "수정에 실패했습니다.");
       setErrorOpen(true);
     }

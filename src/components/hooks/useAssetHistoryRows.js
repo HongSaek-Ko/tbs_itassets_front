@@ -36,9 +36,9 @@ export function useAssetHistoryRows(assetId, open) {
   // 엑셀 export(서버 기준)
   const handleExport = async (str) => {
     // const params = { ...(columnFilters || {}), globalSearch, assetStatus };
-    console.log("이건가?", str);
+    ("이건가?", str);
     const text = str ? str.assetId : "TOTAL";
-    console.log(text);
+    text;
     const res = await exportAssetHistory(text);
     const blob = new Blob([res.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -58,7 +58,7 @@ export function useAssetHistoryRows(assetId, open) {
   // 전체 export
   const totalExport = async (columnFilters, globalSearch) => {
     const params = { ...(columnFilters || {}), globalSearch };
-    console.log(params);
+    params;
     const res = await exportTotalHistory(params);
     const blob = new Blob([res.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -100,8 +100,8 @@ export function useAssetHistoryRows(assetId, open) {
                   "assetHistorySeq",
                   "asset_history_seq",
                 ],
-                ""
-              )
+                "",
+              ),
             );
 
             return {
@@ -114,23 +114,23 @@ export function useAssetHistoryRows(assetId, open) {
               assetHoldEmpHis: pick(
                 r,
                 ["assetHoldEmpHis", "asset_hold_emp_his"],
-                ""
+                "",
               ),
               assetHistoryDesc: pick(
                 r,
                 ["assetHistoryDesc", "asset_history_desc"],
-                ""
+                "",
               ),
               assetHistoryDate: pick(
                 r,
                 ["assetHistoryDate", "asset_history_date"],
-                null
+                null,
               ),
               isFirst: pick(r, ["isFirst", "is_first"]),
               isTransfer: pick(r, ["isTransfer", "is_transfer"]),
               isDispose: pick(r, ["isDispose", "is_dispose"]),
             };
-          })
+          }),
         );
       } catch (e) {
         console.error(e);

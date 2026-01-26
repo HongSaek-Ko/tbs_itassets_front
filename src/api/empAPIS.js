@@ -12,7 +12,7 @@ export const fetchEmpList = (params = {}) => {
 
 // 직원 엑셀 export
 export function exportEmpListExcel(params) {
-  console.log("params: ", params);
+  ("params: ", params);
   // 예시: GET /api/employees/export (responseType: 'blob')
   return axiosInstance.get("/emp/export", {
     params,
@@ -32,13 +32,13 @@ export const fetchEmpIds = () => {
 
 // 직원 등록(벌크)
 export const createEmp = (payload) => {
-  console.log(payload);
+  //  (payload);
   return axiosInstance.post("/emp", payload);
 };
 
 // 직원 수정(벌크)
 export function updateEmpBulk(payload) {
-  console.log("요청 객체: ", payload);
+  ("요청 객체: ", payload);
   // 예시: PATCH /api/employees/bulk
   return axiosInstance.patch("/emp/bulkUpdate", payload);
 }

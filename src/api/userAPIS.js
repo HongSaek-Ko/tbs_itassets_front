@@ -2,7 +2,7 @@ import { axiosInstance } from "./axios";
 
 export const getMe = () => axiosInstance.get("/user/my");
 export const putMe = (body) => {
-  console.log(body);
+  body;
   return axiosInstance.put("/user/my", body);
 };
 

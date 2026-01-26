@@ -41,7 +41,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
 
   // 선택모델(Set)로만 관리
   const [rowSelectionModel, setRowSelectionModel] = useState(() =>
-    emptySelectionModel()
+    emptySelectionModel(),
   );
   const [selectedUiIds, setSelectedUiIds] = useState([]);
 
@@ -63,10 +63,10 @@ export default function RegistFormDialog({ onClose, initialRows }) {
         const list = res.data?.data ?? res.data ?? []; // ApiResponse라서 data.data일 수도 있으니 둘 다 커버
         const arr = Array.isArray(list) ? list : [];
 
-        console.log("시리얼 번호:", arr);
+        ("시리얼 번호:", arr);
 
         existingSnSetRef.current = new Set(
-          arr.map(normalizeSerial).filter(Boolean)
+          arr.map(normalizeSerial).filter(Boolean),
         );
       } catch (e) {
         console.error(e);
@@ -139,7 +139,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
       rowSnMapRef.current.set(rid, next);
       clearErrors(`rows.${idx}.assetSn`);
     },
-    [setValue, setError, clearErrors]
+    [setValue, setError, clearErrors],
   );
 
   // DataGrid id는 useFieldArray가 보장하는 keyName만 사용
@@ -235,7 +235,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
     // uiId -> index(__idx) (fields 직접 참조보다 안전)
     const idxs = selectedUiIds
       .map(
-        (uiId) => gridRows.find((r) => String(r.uiId) === String(uiId))?.__idx
+        (uiId) => gridRows.find((r) => String(r.uiId) === String(uiId))?.__idx,
       )
       .filter((i) => Number.isInteger(i))
       .sort((a, b) => b - a);
@@ -276,7 +276,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
         shouldDirty: true,
       });
     },
-    [empMap, setValue, clearErrors]
+    [empMap, setValue, clearErrors],
   );
 
   // 종류 변경: 품번 자동 생성
@@ -321,7 +321,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
         setAssetIdLoadingRows((p) => ({ ...p, [uiId]: false }));
       }
     },
-    [allocate, release, clearErrors, getValues, setValue]
+    [allocate, release, clearErrors, getValues, setValue],
   );
 
   const validateRows = useCallback(
@@ -354,7 +354,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
       }
       return true;
     },
-    [setError]
+    [setError],
   );
 
   const ensureAssetIds = useCallback(
@@ -398,7 +398,7 @@ export default function RegistFormDialog({ onClose, initialRows }) {
       }
       return true;
     },
-    [allocate, setError, setValue]
+    [allocate, setError, setValue],
   );
 
   const onSubmit = useCallback(
@@ -434,11 +434,11 @@ export default function RegistFormDialog({ onClose, initialRows }) {
         onClose?.();
         window.location.reload();
       } else {
-        console.log(res);
+        res;
         setBottomMsg("자산 등록에 실패했습니다. 입력한 데이터를 확인해주세요.");
       }
     },
-    [ensureAssetIds, onClose, validateRows]
+    [ensureAssetIds, onClose, validateRows],
   );
 
   const columns = useRegistColumns({

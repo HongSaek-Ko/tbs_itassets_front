@@ -88,7 +88,7 @@ export default function EmpDataTable({ title = "직원 목록" }) {
   const isAdmin =
     myAuth.includes("AUTH_ADMIN") || // AUTH로 오면 이걸로
     myAuth.includes("PERM_ADMIN"); // 혹시 따로 있으면
-  console.log("myAuth=", myAuth, "isAdmin=", isAdmin);
+  ("myAuth=", myAuth, "isAdmin=", isAdmin);
 
   const apiRef = useGridApiRef();
 

@@ -24,8 +24,8 @@ export function useAssetRows({
       const rows = Array.isArray(body?.content)
         ? body.content
         : Array.isArray(body)
-        ? body
-        : [];
+          ? body
+          : [];
       setAllRows(rows);
     } catch (e) {
       console.error("자산 목록 조회 실패:", e);
@@ -98,7 +98,7 @@ export function useAssetRows({
   // 엑셀 export(서버 기준)
   const handleExport = async (str) => {
     const params = { ...(columnFilters || {}), globalSearch, assetStatus };
-    console.log(params);
+    params;
     const res = await exportAssetListExcel(params);
     const blob = new Blob([res.data], {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

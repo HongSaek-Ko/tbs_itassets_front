@@ -32,7 +32,7 @@ const Header = ({ toggleSidebar }) => {
       alert("비밀번호 수정이 필요합니다!");
       setEditOpen(true);
     }
-    console.log("user?", user);
+    ("user?", user);
   }, [isLogin]);
   const display = useMemo(() => {
     if (!isLogin) return "미접속";
